@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 280" fill="none" role="img" aria-label="Immo DZ">
+  <defs>
+    <linearGradient id="immoGrad" x1="40" y1="70" x2="220" y2="240" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="0.22" stop-color="#c026d3"/>
+      <stop offset="0.42" stop-color="#ec4899"/>
+      <stop offset="0.55" stop-color="#fb7185"/>
+      <stop offset="0.7" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <mask id="immoMask">
+      <path d="M50,240 L50,70 L96,70 L130,150 L164,70 L210,70 L210,240 L176,240 L176,150 L146,215 L114,215 L84,150 L84,240 Z" fill="#fff"/>
+      <!-- window slits -->
+      <rect x="63" y="150" width="6" height="90" fill="#000"/>
+      <rect x="191" y="150" width="6" height="90" fill="#000"/>
+    </mask>
+  </defs>
+  <rect x="40" y="60" width="180" height="190" fill="url(#immoGrad)" mask="url(#immoMask)"/>
+</svg>

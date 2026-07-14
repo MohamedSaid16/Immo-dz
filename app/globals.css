@@ -1,26 +1,114 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Immo DZ design tokens (shadcn-style, adapted for Tailwind v4)
+   Brand: golden luxury. Light + dark modes, toggled via a `.dark` class on
+   <html> (next-themes). Default is dark.
+--------------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 0.75rem;
+
+  /* Light mode — warm off-white with golden accents */
+  --background: #faf8f4;
+  --foreground: #1a1a2e;
+
+  --card: #ffffff;
+  --card-foreground: #1a1a2e;
+
+  --primary: #c9a84c;
+  --primary-foreground: #1a1a2e;
+
+  --secondary: #f3eee2;
+  --secondary-foreground: #1a1a2e;
+
+  --muted: #f3eee2;
+  --muted-foreground: #6f6a58;
+
+  --accent: #f2e7c8;
+  --accent-foreground: #1a1a2e;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #fef2f2;
+
+  --border: #e7e0d0;
+  --input: #e7e0d0;
+  --ring: #c9a84c;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #3f3a2e;
+  --sidebar-border: #e7e0d0;
+}
+
+.dark {
+  /* Dark mode — deep navy with golden accents (the luxury look) */
+  --background: #0f0f1a;
+  --foreground: #f5f0e8;
+
+  --card: #1a1a2e;
+  --card-foreground: #f5f0e8;
+
+  --primary: #c9a84c;
+  --primary-foreground: #1a1a2e;
+
+  --secondary: #232338;
+  --secondary-foreground: #f5f0e8;
+
+  --muted: #232338;
+  --muted-foreground: #b8ad97;
+
+  --accent: #e8d5a3;
+  --accent-foreground: #1a1a2e;
+
+  --destructive: #f87171;
+  --destructive-foreground: #450a0a;
+
+  --border: #2e2e46;
+  --input: #2e2e46;
+  --ring: #c9a84c;
+
+  --sidebar: #14142a;
+  --sidebar-foreground: #cbc3b0;
+  --sidebar-border: #2e2e46;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --font-sans: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--border);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
