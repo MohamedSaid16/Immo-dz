@@ -11,10 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type LoginFormProps = {
+  passwordUpdated: boolean;
   registrationPending: boolean;
 };
 
-export function LoginForm({ registrationPending }: LoginFormProps) {
+export function LoginForm({
+  passwordUpdated,
+  registrationPending,
+}: LoginFormProps) {
   const [state, formAction, pending] = useActionState(loginAgency, undefined);
 
   return (
@@ -44,6 +48,18 @@ export function LoginForm({ registrationPending }: LoginFormProps) {
           <span>
             تم إنشاء الحساب. تحقق من بريدك الإلكتروني لتأكيده، ثم سجّل الدخول.
           </span>
+        </motion.div>
+      )}
+
+      {passwordUpdated && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          role="status"
+          className="flex items-start gap-2 rounded-xl border border-emerald-200/60 bg-emerald-50/60 px-4 py-3 text-sm font-medium text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-400"
+        >
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.</span>
         </motion.div>
       )}
 
@@ -87,7 +103,7 @@ export function LoginForm({ registrationPending }: LoginFormProps) {
               كلمة المرور
             </Label>
             <Link
-              href="#"
+              href="/forgot-password"
               className="text-xs font-semibold text-[#C9A227] transition-colors hover:text-[#0F172A] dark:hover:text-white"
             >
               نسيت كلمة المرور؟

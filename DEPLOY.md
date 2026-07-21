@@ -145,8 +145,10 @@ Site URL
 https://<stable-preview-domain>.vercel.app
 
 Redirect URLs
+https://<stable-preview-domain>.vercel.app/auth/callback
 https://<stable-preview-domain>.vercel.app/**
 https://*-<team-or-account-slug>.vercel.app/**
+http://localhost:3000/auth/callback
 http://localhost:3000/**
 ```
 
@@ -154,10 +156,17 @@ Use the exact stable Preview origin for the first redirect entry. The wildcard
 entry allows Vercel-generated Preview URLs for the same team/account. Keep the
 localhost entry only for local development.
 
+Password recovery sends users to the exact `/auth/callback` URL, where the
+server exchanges the one-time PKCE code before opening `/reset-password`.
 Registration currently relies on Supabase's Site URL for email confirmation.
 If this Supabase project already serves a production application, do not replace
 its production Site URL without a separate decision; use a separate Preview
 Supabase project or approve an explicit auth redirect strategy first.
+
+Supabase's default email sender is intended for testing and is rate-limited.
+Configure a production SMTP provider under **Authentication > SMTP Settings**
+before relying on registration confirmation or password recovery during the
+agency pilot.
 
 ## 8. Preview verification
 
@@ -170,6 +179,8 @@ origin:
 - Canonical, Open Graph, Twitter and JSON-LD URLs use the Preview origin.
 - `/opengraph-image` and a property `/api/og/property` request return images.
 - Registration confirmation returns to the configured Preview origin.
+- Password recovery returns through `/auth/callback`, opens `/reset-password`,
+  updates the password and returns to login without exposing auth tokens.
 - Login, logout, refreshed auth cookies and dashboard protection work over HTTPS.
 - Draft creation, editing, publishing and public visibility still work.
 - A JPG, PNG and WEBP below 3.5 MiB upload and are normalized by Sharp.

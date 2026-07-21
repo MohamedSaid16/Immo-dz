@@ -38,62 +38,72 @@ export function LeadPipeline({ lead }: { lead: Lead }) {
 
   return (
     <Card>
-      <CardContent className="p-6 space-y-4">
+      <CardContent className="space-y-4 p-4 sm:p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold">مسار المبيعات</h2>
           {pending && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
         </div>
 
-        <div className="relative">
-          {/* Connecting line */}
-          <div className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 bg-secondary rounded-full" />
-          
-          <div className="relative flex justify-between gap-2">
-            {LEAD_PIPELINE.map((status, index) => {
-              const isActive = index === currentIndex;
-              const isPast = index < currentIndex;
-              const isFuture = index > currentIndex;
-              const config = LEAD_STATUS_LABELS[status];
+        <div
+          className="-mx-2 overflow-x-auto px-2 pb-2"
+          role="region"
+          aria-label="مراحل مسار المبيعات"
+          tabIndex={0}
+        >
+          <div className="relative min-w-[42rem]">
+            {/* Connecting line */}
+            <div className="absolute top-1/2 right-0 left-0 h-1 -translate-y-1/2 rounded-full bg-secondary" />
 
-              return (
-                <button
-                  key={status}
-                  type="button"
-                  onClick={() => handleSelect(status, index)}
-                  disabled={pending}
-                  className={cn(
-                    "relative flex flex-col items-center gap-2 group outline-none",
-                    pending && "opacity-50"
-                  )}
-                >
-                  {/* Circle */}
-                  <div
+            <div className="relative flex justify-between gap-2">
+              {LEAD_PIPELINE.map((status, index) => {
+                const isActive = index === currentIndex;
+                const isPast = index < currentIndex;
+                const isFuture = index > currentIndex;
+                const config = LEAD_STATUS_LABELS[status];
+
+                return (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => handleSelect(status, index)}
+                    disabled={pending}
                     className={cn(
-                      "z-10 flex size-8 items-center justify-center rounded-full border-2 bg-card transition-colors group-hover:scale-110",
-                      isActive && "border-primary bg-primary text-primary-foreground",
-                      isPast && "border-primary bg-primary/10 text-primary",
-                      isFuture && "border-border text-muted-foreground"
+                      "group relative flex flex-col items-center gap-2 outline-none",
+                      pending && "opacity-50",
                     )}
                   >
-                    {isPast ? (
-                      <Check className="size-4" />
-                    ) : (
-                      <span className="text-xs font-bold">{index + 1}</span>
-                    )}
-                  </div>
-                  
-                  {/* Label */}
-                  <span
-                    className={cn(
-                      "text-[11px] font-medium text-center whitespace-nowrap transition-colors",
-                      isActive ? "text-primary font-bold" : "text-muted-foreground group-hover:text-foreground"
-                    )}
-                  >
-                    {config.label}
-                  </span>
-                </button>
-              );
-            })}
+                    {/* Circle */}
+                    <div
+                      className={cn(
+                        "z-10 flex size-8 items-center justify-center rounded-full border-2 bg-card transition-colors group-hover:scale-110",
+                        isActive &&
+                          "border-primary bg-primary text-primary-foreground",
+                        isPast && "border-primary bg-primary/10 text-primary",
+                        isFuture && "border-border text-muted-foreground",
+                      )}
+                    >
+                      {isPast ? (
+                        <Check className="size-4" />
+                      ) : (
+                        <span className="text-xs font-bold">{index + 1}</span>
+                      )}
+                    </div>
+
+                    {/* Label */}
+                    <span
+                      className={cn(
+                        "text-center text-[11px] font-medium whitespace-nowrap transition-colors",
+                        isActive
+                          ? "font-bold text-primary"
+                          : "text-muted-foreground group-hover:text-foreground",
+                      )}
+                    >
+                      {config.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
         {error && (

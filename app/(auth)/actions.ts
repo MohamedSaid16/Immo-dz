@@ -3,10 +3,14 @@
 import { redirect } from "next/navigation";
 import type { AuthError } from "@supabase/supabase-js";
 
+import { getAbsoluteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 import { WILAYAS } from "@/lib/wilayas";
 
 export type AuthState = { error?: string } | undefined;
+export type PasswordRecoveryState =
+  | { error?: string; success?: string }
+  | undefined;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ALGERIAN_PHONE_PATTERN = /^(?:0[2-7]\d{7,8}|\+213[2-7]\d{7,8})$/;
@@ -214,4 +218,97 @@ export async function loginAgency(
   }
 
   redirect("/dashboard");
+}
+
+export async function requestPasswordReset(
+  _prev: PasswordRecoveryState,
+  formData: FormData,
+): Promise<PasswordRecoveryState> {
+  const email = normalizeEmail(formData.get("email"));
+
+  if (!email || !isValidEmail(email)) {
+    return { error: "يرجى إدخال بريد إلكتروني صالح." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: getAbsoluteUrl("/auth/callback"),
+  });
+
+  if (error) {
+    console.error("Failed to request password recovery", {
+      code: error.code ?? "unexpected",
+    });
+
+    if (error.message.toLowerCase().includes("rate limit")) {
+      return {
+        error:
+          "تم تجاوز عدد محاولات الاسترجاع المسموح. يرجى الانتظار قليلاً ثم المحاولة مجدداً.",
+      };
+    }
+
+    return {
+      error: "تعذر إرسال رابط الاسترجاع حالياً. يرجى المحاولة مرة أخرى.",
+    };
+  }
+
+  return {
+    success:
+      "إذا كان البريد مسجلاً، ستصلك رسالة تحتوي على رابط آمن لتعيين كلمة مرور جديدة.",
+  };
+}
+
+export async function updateRecoveredPassword(
+  _prev: PasswordRecoveryState,
+  formData: FormData,
+): Promise<PasswordRecoveryState> {
+  const password = String(formData.get("password") ?? "");
+  const passwordConfirmation = String(
+    formData.get("passwordConfirmation") ?? "",
+  );
+
+  if (!password || !passwordConfirmation) {
+    return { error: "يرجى إدخال كلمة المرور الجديدة وتأكيدها." };
+  }
+  if (password.length < 6) {
+    return { error: "كلمة المرور يجب أن تكون 6 أحرف على الأقل." };
+  }
+  if (password.length > 72) {
+    return { error: "كلمة المرور طويلة جداً." };
+  }
+  if (password !== passwordConfirmation) {
+    return { error: "كلمتا المرور غير متطابقتين." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return {
+      error:
+        "انتهت صلاحية رابط الاسترجاع أو أنه غير صالح. اطلب رابطاً جديداً وحاول مجدداً.",
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    console.error("Failed to update recovered password", {
+      code: error.code ?? "unexpected",
+    });
+    return { error: translateAuthError(error) };
+  }
+
+  const { error: signOutError } = await supabase.auth.signOut({
+    scope: "local",
+  });
+  if (signOutError) {
+    console.error("Failed to clear password recovery session", {
+      code: signOutError.code ?? "unexpected",
+    });
+  }
+
+  redirect("/login?passwordUpdated=1");
 }
