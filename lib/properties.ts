@@ -82,12 +82,44 @@ function requirePropertyService(): void {
 
 function throwPropertyQueryError(
   operation: string,
-  error: { code?: string },
+  error: unknown,
   context?: Record<string, string>,
 ): never {
+  const errorRecord =
+    typeof error === "object" && error !== null
+      ? (error as Record<string, unknown>)
+      : null;
+  const causeRecord =
+    typeof errorRecord?.cause === "object" && errorRecord.cause !== null
+      ? (errorRecord.cause as Record<string, unknown>)
+      : null;
+
   console.error(`[properties:${operation}]`, {
     ...context,
-    code: error.code ?? "unexpected",
+    name: typeof errorRecord?.name === "string" ? errorRecord.name : null,
+    code: typeof errorRecord?.code === "string" ? errorRecord.code : null,
+    message:
+      typeof errorRecord?.message === "string" ? errorRecord.message : null,
+    details:
+      typeof errorRecord?.details === "string" ? errorRecord.details : null,
+    hint: typeof errorRecord?.hint === "string" ? errorRecord.hint : null,
+    status: typeof errorRecord?.status === "number" ? errorRecord.status : null,
+    statusText:
+      typeof errorRecord?.statusText === "string"
+        ? errorRecord.statusText
+        : null,
+    cause: causeRecord
+      ? {
+          name:
+            typeof causeRecord.name === "string" ? causeRecord.name : null,
+          code:
+            typeof causeRecord.code === "string" ? causeRecord.code : null,
+          message:
+            typeof causeRecord.message === "string"
+              ? causeRecord.message
+              : null,
+        }
+      : null,
   });
   throw new Error("تعذّر تحميل بيانات العقارات.");
 }
