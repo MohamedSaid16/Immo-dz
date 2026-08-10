@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { isUuid } from "@/lib/lead-validation";
-import type { SocialActionResult, SocialChannel } from "@/lib/social-publishing/contracts";
+import type { SocialActionResult } from "@/lib/social-publishing/contracts";
 import {
   prepareSocialPublicationRpc,
   updateSocialPublicationContentRpc,
@@ -108,5 +108,3 @@ export async function updateSocialPublicationContent(
     return { ok: false, error: databaseErrorMessage(error) };
   }
 }
-
-export type { SocialChannel };
