@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react";
 
 import { PropertyForm } from "../../property-form";
 import { getCurrentAgencyId, getPropertyById } from "@/lib/properties";
+import type { SocialPublication } from "@/lib/social-publishing/contracts";
+import { getSocialPublications } from "@/lib/social-publishing/repository";
 
 export default async function EditPropertyPage({
   params,
@@ -16,6 +18,14 @@ export default async function EditPropertyPage({
 
   if (!property || !agencyId || property.agencyId !== agencyId) {
     notFound();
+  }
+
+  let socialPublications: SocialPublication[] = [];
+  let socialLoadError: string | undefined;
+  try {
+    socialPublications = await getSocialPublications(id, agencyId);
+  } catch {
+    socialLoadError = "تعذّر تحميل إعدادات النشر الاجتماعي. طبّق migration 009 ثم أعد المحاولة.";
   }
 
   return (
@@ -34,7 +44,12 @@ export default async function EditPropertyPage({
         </p>
       </div>
 
-      <PropertyForm mode="edit" property={property} />
+      <PropertyForm
+        mode="edit"
+        property={property}
+        socialPublications={socialPublications}
+        socialLoadError={socialLoadError}
+      />
     </div>
   );
 }

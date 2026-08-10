@@ -92,6 +92,20 @@ export function getPropertyPath(identifier: string): string {
   return `/biens/${encodeURIComponent(identifier)}`;
 }
 
+export type SocialAttributionChannel = "facebook" | "instagram";
+
+/** Build the canonical property URL that future social publishing can use. */
+export function getSocialPropertyUrl(
+  identifier: string,
+  channel: SocialAttributionChannel,
+): string {
+  const url = new URL(getAbsoluteUrl(getPropertyPath(identifier)));
+  url.searchParams.set("utm_source", channel);
+  url.searchParams.set("utm_medium", "social");
+  url.searchParams.set("utm_campaign", "property");
+  return url.toString();
+}
+
 export function getAgencyPath(agencyId: string): string {
   return `/agences/${encodeURIComponent(agencyId)}`;
 }

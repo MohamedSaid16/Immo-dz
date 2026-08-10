@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import {
   ChevronDown,
   Globe,
@@ -11,9 +11,12 @@ import {
 } from "lucide-react";
 
 import { saveProperty } from "./actions";
+import { prepareSocialPublication } from "./social-actions";
 import { AmenityPicker } from "@/components/dashboard/amenity-picker";
 import { EnergyClassSelect } from "@/components/dashboard/energy-class-select";
 import { PhotoUpload } from "@/components/dashboard/photo-upload";
+import { PropertyMarketingAssistant } from "@/components/dashboard/property-marketing-assistant";
+import { SocialPublishingSection } from "@/components/dashboard/social-publishing-section";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -38,6 +41,11 @@ import {
   type TransactionType,
 } from "@/lib/types";
 import { WILAYAS } from "@/lib/wilayas";
+import type {
+  SocialActionResult,
+  SocialChannel,
+  SocialPublication,
+} from "@/lib/social-publishing/contracts";
 
 const PROPERTY_TYPES = Object.entries(PROPERTY_TYPE_LABELS) as [
   PropertyType,
@@ -94,14 +102,69 @@ function Section({
 export function PropertyForm({
   mode,
   property,
+  socialPublications = [],
+  socialLoadError,
 }: {
   mode: "add" | "edit";
   property?: Property;
+  socialPublications?: SocialPublication[];
+  socialLoadError?: string;
 }) {
   const [state, formAction, pending] = useActionState(saveProperty, undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [socialRows, setSocialRows] = useState<SocialPublication[]>(socialPublications);
+  const [socialDrafts, setSocialDrafts] = useState<Record<SocialChannel, string>>(() => ({
+    facebook:
+      socialPublications.find((publication) => publication.channel === "facebook")
+        ?.approvedContent ?? "",
+    instagram:
+      socialPublications.find((publication) => publication.channel === "instagram")
+        ?.approvedContent ?? "",
+  }));
+
+  function applyAiField(
+    field: "title" | "description" | "title_fr" | "description_fr",
+    value: string,
+  ): void {
+    const element = formRef.current?.elements.namedItem(field);
+    if (!(element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement)) {
+      return;
+    }
+    element.value = value;
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+
+  function handleSocialPublicationChange(publication: SocialPublication): void {
+    setSocialRows((current) => {
+      const withoutCurrent = current.filter((item) => item.channel !== publication.channel);
+      return [...withoutCurrent, publication];
+    });
+    setSocialDrafts((current) => ({
+      ...current,
+      [publication.channel]: publication.approvedContent,
+    }));
+  }
+
+  function handleSocialDraftChange(channel: SocialChannel, content: string): void {
+    setSocialDrafts((current) => ({ ...current, [channel]: content }));
+  }
+
+  async function handlePrepareSocial(
+    channel: SocialChannel,
+    content: string,
+  ): Promise<SocialActionResult> {
+    if (!property) {
+      return { ok: false, error: "احفظ العقار أولاً قبل تحضير محتوى النشر." };
+    }
+
+    const result = await prepareSocialPublication(property.id, channel, content);
+    if (result.ok) handleSocialPublicationChange(result.publication);
+    return result;
+  }
 
   return (
-    <form action={formAction} className="space-y-6">
+    <form ref={formRef} action={formAction} className="space-y-6">
       {property && <input type="hidden" name="id" value={property.id} />}
 
       {state?.error && (
@@ -424,6 +487,23 @@ export function PropertyForm({
           </div>
         </div>
       </Section>
+
+      <PropertyMarketingAssistant
+        formRef={formRef}
+        onApplyField={applyAiField}
+        onPrepareSocial={mode === "edit" && property ? handlePrepareSocial : undefined}
+      />
+
+      {mode === "edit" && property && (
+        <SocialPublishingSection
+          propertyId={property.id}
+          publications={socialRows}
+          drafts={socialDrafts}
+          loadError={socialLoadError}
+          onDraftChange={handleSocialDraftChange}
+          onPublicationChange={handleSocialPublicationChange}
+        />
+      )}
 
       {/* ============================================================ */}
       {/* 6. Media                                                      */}

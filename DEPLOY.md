@@ -196,3 +196,35 @@ origin:
   upload errors.
 
 Do not promote the deployment to Production until the complete checklist passes.
+
+## 9. Internal AI Property Marketing Assistant (P1)
+
+The AI assistant is an authenticated dashboard enhancement only. It is not a
+public chatbot, CRM assistant, image generator, or social publishing system.
+
+Configure these variables server-side in Vercel under the appropriate Preview or
+Production environment scope:
+
+```text
+AI_ENABLED=false
+AI_PROVIDER=openai
+AI_API_KEY=<server-only OpenAI API key>
+AI_MODEL=gpt-5.4-mini-2026-03-17
+AI_REQUEST_TIMEOUT_MS=15000
+AI_DAILY_GENERATION_LIMIT=20
+```
+
+Never prefix these variables with `NEXT_PUBLIC_`. The assistant sends only
+sanitized factual property fields to the provider. It excludes exact address,
+coordinates, agency-private data, CRM data, credentials and internal IDs.
+
+The daily limit is enforced by the authenticated Supabase quota RPC and is
+derived from the current agency session. Provider failures release their short-
+lived reservation; only usable generated content counts against the daily
+completed-generation total. Generated social and SEO copy remains ephemeral in
+P1 and is not persisted or published automatically.
+
+Before enabling `AI_ENABLED`, apply `supabase/008_ai_usage.sql` manually in the
+Supabase SQL editor and verify the quota RPCs. Do not place the OpenAI key in
+the repository, `.env.example`, browser code, or client-visible environment
+variables.
