@@ -25,10 +25,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 type SocialPublishingSectionProps = {
-  propertyId: string;
+  propertyId?: string;
   publications: SocialPublication[];
   drafts: Record<SocialChannel, string>;
   loadError?: string;
+  disabled?: boolean;
   onDraftChange: (channel: SocialChannel, content: string) => void;
   onPublicationChange: (publication: SocialPublication) => void;
 };
@@ -43,6 +44,7 @@ export function SocialPublishingSection({
   publications,
   drafts,
   loadError,
+  disabled = false,
   onDraftChange,
   onPublicationChange,
 }: SocialPublishingSectionProps) {
@@ -51,6 +53,8 @@ export function SocialPublishingSection({
   const [isPending, startTransition] = useTransition();
 
   function saveDraft(channel: SocialChannel): void {
+    if (!propertyId || disabled) return;
+
     const validation = validateSocialContent(channel, drafts[channel]);
     if (!validation.ok) {
       setError(validation.error);
@@ -76,8 +80,29 @@ export function SocialPublishingSection({
     });
   }
 
+  if (disabled) {
+    return (
+      <Card className="border-dashed bg-secondary/20 shadow-none">
+        <CardHeader>
+          <CardTitle>النشر الاجتماعي</CardTitle>
+          <CardDescription>
+            جهّز محتوى Facebook وInstagram بعد حفظ العقار وفتح صفحة التعديل.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p
+            role="status"
+            className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground"
+          >
+            احفظ العقار أولاً، ثم يمكنك تجهيز محتوى Facebook وInstagram من صفحة التعديل.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <Card>
+    <Card className="shadow-none">
       <CardHeader>
         <CardTitle>النشر الاجتماعي</CardTitle>
         <CardDescription>

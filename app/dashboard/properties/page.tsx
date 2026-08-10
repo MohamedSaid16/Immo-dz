@@ -21,11 +21,11 @@ export default async function PropertiesPage() {
   const properties = [...active, ...archived];
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-7xl space-y-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">العقارات</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             {properties.length} عقار — أدر عقارات وكالتك من مكان واحد.
           </p>
         </div>

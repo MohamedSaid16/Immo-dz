@@ -11,7 +11,7 @@ export default async function LeadsPage() {
   const agencyId = await getCurrentAgencyId();
   if (!agencyId) {
     return (
-      <div className="rounded-xl border border-dashed border-border p-12 text-center text-sm text-muted-foreground">
+      <div className="rounded-lg border border-border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
         يرجى إكمال بيانات الوكالة لعرض العملاء المحتملين.
       </div>
     );
@@ -23,7 +23,7 @@ export default async function LeadsPage() {
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-7xl space-y-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">
@@ -33,16 +33,16 @@ export default async function LeadsPage() {
             {stats.total} عميل — أدر عملاءك وتابع تقدمهم من مكان واحد.
           </p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button type="button" variant="outline" className="gap-2" disabled>
           <Download className="size-4" />
           تصدير (قريباً)
         </Button>
       </div>
 
       {/* Stats summary */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-3">
         <Card>
-          <CardContent className="p-5">
+          <CardContent className="p-4">
             <p className="text-sm font-medium text-muted-foreground">
               إجمالي العملاء
             </p>
@@ -52,7 +52,7 @@ export default async function LeadsPage() {
           </CardContent>
         </Card>
         <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="p-5">
+          <CardContent className="p-4">
             <p className="text-sm font-medium text-primary">طلبات جديدة</p>
             <p className="mt-1 flex items-end gap-2 text-3xl font-extrabold tabular-nums text-foreground">
               {stats.new}
@@ -63,7 +63,7 @@ export default async function LeadsPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-5">
+          <CardContent className="p-4">
             <p className="text-sm font-medium text-muted-foreground">
               طلبات هذا الأسبوع
             </p>

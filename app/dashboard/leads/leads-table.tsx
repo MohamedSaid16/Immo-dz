@@ -7,11 +7,13 @@ import {
   Eye,
   MessageCircle,
   Phone,
+  Search,
 } from "lucide-react";
 
 import { updateStatusAction } from "./actions";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,9 +44,15 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
   { key: "converted", label: LEAD_STATUS_LABELS.converted.label },
 ];
 
-function filterLeads(leads: Lead[], tab: FilterTab): Lead[] {
-  if (tab === "all") return leads;
-  return leads.filter((l) => l.status === tab);
+function filterLeads(leads: Lead[], tab: FilterTab, query: string): Lead[] {
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  return leads.filter((lead) => {
+    const matchesTab = tab === "all" || lead.status === tab;
+    if (!matchesTab) return false;
+    if (!normalizedQuery) return true;
+    return [lead.name, lead.phone, lead.email ?? "", lead.propertyTitle ?? ""]
+      .some((value) => value.toLocaleLowerCase().includes(normalizedQuery));
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -109,13 +117,17 @@ function StatusDropdown({ lead }: { lead: Lead }) {
 
 export function LeadsTable({ leads }: { leads: Lead[] }) {
   const [tab, setTab] = useState<FilterTab>("all");
-  const filtered = filterLeads(leads, tab);
+  const [query, setQuery] = useState("");
+  const filtered = filterLeads(leads, tab, query);
 
   if (leads.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border p-12 text-center">
-        <p className="text-sm text-muted-foreground">
+      <div className="rounded-lg border border-border bg-card px-6 py-8 text-center">
+        <p className="text-sm font-semibold text-foreground">
           لا توجد طلبات حتى الآن.
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          ستظهر طلبات العملاء هنا عند تواصلهم مع وكالتك.
         </p>
       </div>
     );
@@ -123,30 +135,41 @@ export function LeadsTable({ leads }: { leads: Lead[] }) {
 
   return (
     <div className="space-y-4">
-      {/* Filter tabs */}
-      <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-secondary/50 p-1">
-        {FILTER_TABS.map(({ key, label }) => {
-          const count =
-            key === "all" ? leads.length : leads.filter((l) => l.status === key).length;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setTab(key)}
-              className={cn(
-                "flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-all",
-                tab === key
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {label}
-              <span className="mr-1 text-[10px] text-muted-foreground">
-                ({count})
-              </span>
-            </button>
-          );
-        })}
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="ابحث باسم العميل أو الهاتف أو العقار"
+            aria-label="البحث في العملاء المحتملين"
+            className="pr-9"
+          />
+        </div>
+        <div className="flex gap-1 overflow-x-auto rounded-lg border border-border bg-secondary/50 p-1">
+          {FILTER_TABS.map(({ key, label }) => {
+            const count =
+              key === "all" ? leads.length : leads.filter((l) => l.status === key).length;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTab(key)}
+                className={cn(
+                  "min-w-max flex-1 whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                  tab === key
+                    ? "bg-card text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {label}
+                <span className="mr-1 text-[10px] text-muted-foreground">
+                  ({count})
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card">

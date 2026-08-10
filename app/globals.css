@@ -73,6 +73,58 @@
   --sidebar-border: #2e2e46;
 }
 
+/* Dashboard-only visual layer. Public, auth, and marketplace routes keep the
+   original brand tokens above; the dashboard gets a calmer SaaS surface while
+   retaining Immo DZ gold for actions and active states. */
+.dashboard-shell {
+  --radius: 0.625rem;
+  --background: #f6f7f9;
+  --foreground: #172033;
+  --card: #ffffff;
+  --card-foreground: #172033;
+  --primary: #b88a2d;
+  --primary-foreground: #fffaf0;
+  --secondary: #eef1f4;
+  --secondary-foreground: #243047;
+  --muted: #eef1f4;
+  --muted-foreground: #657084;
+  --accent: #f5ead0;
+  --accent-foreground: #5b4318;
+  --border: #e1e5ea;
+  --input: #d9dee6;
+  --ring: #b88a2d;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #263247;
+  --sidebar-border: #e1e5ea;
+}
+
+.dark .dashboard-shell {
+  --background: #111622;
+  --foreground: #edf1f7;
+  --card: #192130;
+  --card-foreground: #edf1f7;
+  --primary: #d5ae55;
+  --primary-foreground: #211a0c;
+  --secondary: #202a3a;
+  --secondary-foreground: #edf1f7;
+  --muted: #202a3a;
+  --muted-foreground: #aab5c5;
+  --accent: #3a311e;
+  --accent-foreground: #f2d68e;
+  --border: #2b3647;
+  --input: #354155;
+  --ring: #d5ae55;
+  --sidebar: #151d2b;
+  --sidebar-foreground: #d3dbe7;
+  --sidebar-border: #2b3647;
+}
+
+.dashboard-shell input:not([type="radio"]):not([type="checkbox"]),
+.dashboard-shell select,
+.dashboard-shell textarea {
+  box-shadow: none;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

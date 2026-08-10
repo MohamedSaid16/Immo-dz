@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useActionState, useRef, useState } from "react";
 import {
-  ChevronDown,
   Globe,
   Loader2,
   Save,
@@ -16,6 +15,12 @@ import { AmenityPicker } from "@/components/dashboard/amenity-picker";
 import { EnergyClassSelect } from "@/components/dashboard/energy-class-select";
 import { PhotoUpload } from "@/components/dashboard/photo-upload";
 import { PropertyMarketingAssistant } from "@/components/dashboard/property-marketing-assistant";
+import {
+  getPropertyFormSection,
+  PropertyFormTabs,
+  type PropertyFormSectionId,
+} from "@/components/dashboard/property-form-tabs";
+import { PropertySummaryHeader } from "@/components/dashboard/property-summary-header";
 import { SocialPublishingSection } from "@/components/dashboard/social-publishing-section";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -40,6 +45,7 @@ import {
   type PropertyType,
   type TransactionType,
 } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { WILAYAS } from "@/lib/wilayas";
 import type {
   SocialActionResult,
@@ -61,37 +67,37 @@ const STATUSES = Object.entries(STATUS_LABELS) as [
 ][];
 
 /* ------------------------------------------------------------------ */
-/*  Collapsible section                                                */
+/*  Tabbed form section                                                */
 /* ------------------------------------------------------------------ */
 
 function Section({
+  id,
   title,
-  defaultOpen = true,
+  activeSection,
   children,
 }: {
+  id: PropertyFormSectionId;
   title: string;
-  defaultOpen?: boolean;
+  activeSection: PropertyFormSectionId;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const active = activeSection === id;
 
   return (
-    <Card>
-      <CardHeader
-        className="cursor-pointer select-none"
-        onClick={() => setOpen((v) => !v)}
-      >
-        <div className="flex items-center justify-between">
-          <CardTitle>{title}</CardTitle>
-          <ChevronDown
-            className={`size-5 text-muted-foreground transition-transform ${
-              open ? "rotate-180" : ""
-            }`}
-          />
-        </div>
-      </CardHeader>
-      {open && <CardContent>{children}</CardContent>}
-    </Card>
+    <section
+      id={`property-section-${id}`}
+      role="tabpanel"
+      aria-labelledby={`property-tab-${id}`}
+      hidden={!active}
+      tabIndex={-1}
+    >
+      <Card>
+        <CardHeader className="border-b border-border/70 px-4 py-3">
+          <CardTitle className="text-base">{title}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">{children}</CardContent>
+      </Card>
+    </section>
   );
 }
 
@@ -112,6 +118,11 @@ export function PropertyForm({
 }) {
   const [state, formAction, pending] = useActionState(saveProperty, undefined);
   const formRef = useRef<HTMLFormElement>(null);
+  const [activeSection, setActiveSection] = useState<PropertyFormSectionId>("basic");
+  const [invalidSections, setInvalidSections] = useState<Set<PropertyFormSectionId>>(
+    () => new Set(),
+  );
+  const invalidHandled = useRef(false);
   const [socialRows, setSocialRows] = useState<SocialPublication[]>(socialPublications);
   const [socialDrafts, setSocialDrafts] = useState<Record<SocialChannel, string>>(() => ({
     facebook:
@@ -163,9 +174,48 @@ export function PropertyForm({
     return result;
   }
 
+  function handleInvalid(event: React.InvalidEvent<HTMLFormElement>): void {
+    if (invalidHandled.current) return;
+
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement)) {
+      return;
+    }
+
+    const section = getPropertyFormSection(target.name);
+    if (!section) return;
+
+    invalidHandled.current = true;
+    setActiveSection(section);
+    setInvalidSections((current) => new Set(current).add(section));
+
+    window.setTimeout(() => {
+      target.focus({ preventScroll: false });
+    }, 0);
+  }
+
+  function handleInput(): void {
+    invalidHandled.current = false;
+    setInvalidSections(new Set());
+  }
+
   return (
-    <form ref={formRef} action={formAction} className="space-y-6">
+    <form
+      ref={formRef}
+      action={formAction}
+      className="space-y-6 pb-24 sm:pb-28"
+      onInvalidCapture={handleInvalid}
+      onInputCapture={handleInput}
+    >
       {property && <input type="hidden" name="id" value={property.id} />}
+
+      {property && <PropertySummaryHeader property={property} />}
+
+      <PropertyFormTabs
+        activeSection={activeSection}
+        invalidSections={invalidSections}
+        onChange={setActiveSection}
+      />
 
       {state?.error && (
         <p
@@ -179,10 +229,10 @@ export function PropertyForm({
       {/* ============================================================ */}
       {/* 1. Basic Info                                                 */}
       {/* ============================================================ */}
-      <Section title="المعلومات الأساسية">
+      <Section id="basic" activeSection={activeSection} title="المعلومات الأساسية">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="title">العنوان (عربي) *</Label>
+            <Label htmlFor="title">العنوان بالعربية *</Label>
             <Input
               id="title"
               name="title"
@@ -194,7 +244,7 @@ export function PropertyForm({
 
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="title_fr">
-              العنوان (فرنسي) · Titre en français
+              العنوان بالفرنسية
             </Label>
             <Input
               id="title_fr"
@@ -252,12 +302,36 @@ export function PropertyForm({
             </div>
           </div>
         </div>
+
+        <div className="mt-6 space-y-4 border-t border-border pt-6">
+          <div className="space-y-2">
+            <Label htmlFor="description">الوصف بالعربية</Label>
+            <Textarea
+              id="description"
+              name="description"
+              rows={4}
+              placeholder="اكتب وصفًا واضحًا للعقار..."
+              defaultValue={property?.description}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description_fr">الوصف بالفرنسية</Label>
+            <Textarea
+              id="description_fr"
+              name="description_fr"
+              rows={4}
+              dir="ltr"
+              placeholder="Décrivez le bien en français..."
+              defaultValue={property?.descriptionFr ?? ""}
+            />
+          </div>
+        </div>
       </Section>
 
       {/* ============================================================ */}
       {/* 2. Location                                                   */}
       {/* ============================================================ */}
-      <Section title="الموقع">
+      <Section id="location" activeSection={activeSection} title="الموقع">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="wilaya">الولاية *</Label>
@@ -296,7 +370,7 @@ export function PropertyForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="latitude">خط العرض (Latitude)</Label>
+            <Label htmlFor="latitude">خط العرض</Label>
             <Input
               id="latitude"
               name="latitude"
@@ -308,7 +382,7 @@ export function PropertyForm({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="longitude">خط الطول (Longitude)</Label>
+            <Label htmlFor="longitude">خط الطول</Label>
             <Input
               id="longitude"
               name="longitude"
@@ -328,7 +402,7 @@ export function PropertyForm({
       {/* ============================================================ */}
       {/* 3. Details                                                    */}
       {/* ============================================================ */}
-      <Section title="التفاصيل">
+      <Section id="details" activeSection={activeSection} title="التفاصيل">
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <div className="space-y-2">
             <Label htmlFor="rooms">عدد الغرف</Label>
@@ -423,16 +497,16 @@ export function PropertyForm({
             <EnergyClassSelect defaultValue={property?.energyClass} />
           </div>
         </div>
-      </Section>
 
       {/* ============================================================ */}
       {/* 4. Amenities & Features                                       */}
       {/* ============================================================ */}
-      <Section title="المرافق والمميزات" defaultOpen={mode === "edit"}>
-        <div className="space-y-6">
+      <div className="mt-6 space-y-6 border-t border-border pt-6">
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-foreground">التجهيزات والمميزات</p>
           <AmenityPicker
             name="amenities"
-            label="المرافق · Équipements"
+            label="التجهيزات"
             options={AMENITIES_OPTIONS}
             defaultValue={property?.amenities ?? []}
           />
@@ -441,7 +515,7 @@ export function PropertyForm({
 
           <AmenityPicker
             name="features"
-            label="مميزات العقار · Caractéristiques"
+            label="مميزات العقار"
             options={FEATURES_OPTIONS}
             defaultValue={property?.features ?? []}
           />
@@ -450,124 +524,86 @@ export function PropertyForm({
 
           <AmenityPicker
             name="nearby_places"
-            label="أماكن قريبة · À proximité"
+            label="أماكن قريبة"
             options={NEARBY_PLACES_OPTIONS}
             defaultValue={property?.nearbyPlaces ?? []}
+          />
+        </div>
+      </div>
+
+        <div className="mt-6 grid gap-4 border-t border-border pt-6 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="video_url">رابط الفيديو</Label>
+            <Input
+              id="video_url"
+              name="video_url"
+              type="url"
+              dir="ltr"
+              placeholder="https://youtube.com/watch?v=..."
+              defaultValue={property?.videoUrl ?? ""}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="virtual_tour_url">رابط الجولة الافتراضية</Label>
+            <Input
+              id="virtual_tour_url"
+              name="virtual_tour_url"
+              type="url"
+              dir="ltr"
+              placeholder="https://my.matterport.com/..."
+              defaultValue={property?.virtualTourUrl ?? ""}
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Section id="marketing" activeSection={activeSection} title="التسويق">
+        <div className="space-y-6">
+          <PropertyMarketingAssistant
+            formRef={formRef}
+            onApplyField={applyAiField}
+            onPrepareSocial={mode === "edit" && property ? handlePrepareSocial : undefined}
+          />
+
+          <SocialPublishingSection
+            propertyId={property?.id}
+            publications={socialRows}
+            drafts={socialDrafts}
+            loadError={socialLoadError}
+            disabled={mode === "add"}
+            onDraftChange={handleSocialDraftChange}
+            onPublicationChange={handleSocialPublicationChange}
           />
         </div>
       </Section>
 
       {/* ============================================================ */}
-      {/* 5. Description                                                */}
-      {/* ============================================================ */}
-      <Section title="الوصف">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="description">الوصف (عربي)</Label>
-            <Textarea
-              id="description"
-              name="description"
-              rows={4}
-              placeholder="اكتب وصفًا واضحًا للعقار..."
-              defaultValue={property?.description}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="description_fr">
-              الوصف (فرنسي) · Description en français
-            </Label>
-            <Textarea
-              id="description_fr"
-              name="description_fr"
-              rows={4}
-              dir="ltr"
-              placeholder="Décrivez le bien en français..."
-              defaultValue={property?.descriptionFr ?? ""}
-            />
-          </div>
-        </div>
-      </Section>
-
-      <PropertyMarketingAssistant
-        formRef={formRef}
-        onApplyField={applyAiField}
-        onPrepareSocial={mode === "edit" && property ? handlePrepareSocial : undefined}
-      />
-
-      {mode === "edit" && property && (
-        <SocialPublishingSection
-          propertyId={property.id}
-          publications={socialRows}
-          drafts={socialDrafts}
-          loadError={socialLoadError}
-          onDraftChange={handleSocialDraftChange}
-          onPublicationChange={handleSocialPublicationChange}
-        />
-      )}
-
-      {/* ============================================================ */}
       {/* 6. Media                                                      */}
       {/* ============================================================ */}
-      <Section title="الوسائط" defaultOpen={mode === "edit"}>
+      <Section id="images" activeSection={activeSection} title="الصور">
         <div className="space-y-6">
           <PhotoUpload
             propertyId={property?.id}
             initialPhotos={property?.photos}
           />
-
-          <hr className="border-border" />
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="video_url">
-                رابط الفيديو · Lien vidéo
-              </Label>
-              <Input
-                id="video_url"
-                name="video_url"
-                type="url"
-                dir="ltr"
-                placeholder="https://youtube.com/watch?v=..."
-                defaultValue={property?.videoUrl ?? ""}
-              />
-              <p className="text-[11px] text-muted-foreground">
-                YouTube أو رابط فيديو مباشر.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="virtual_tour_url">
-                جولة افتراضية · Visite virtuelle
-              </Label>
-              <Input
-                id="virtual_tour_url"
-                name="virtual_tour_url"
-                type="url"
-                dir="ltr"
-                placeholder="https://my.matterport.com/..."
-                defaultValue={property?.virtualTourUrl ?? ""}
-              />
-              <p className="text-[11px] text-muted-foreground">
-                Matterport أو أي رابط جولة 360°.
-              </p>
-            </div>
-          </div>
         </div>
       </Section>
 
       {/* ============================================================ */}
       {/* 7. Publishing                                                 */}
       {/* ============================================================ */}
-      <Card className="border-primary/30 bg-primary/5">
-        <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-foreground">
-              حالة النشر · Publication
-            </p>
-            <p className="text-xs text-muted-foreground">
-              المسودات لا تظهر في البحث العام. انشر عند الجاهزية.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
+      <Section id="publishing" activeSection={activeSection} title="النشر">
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-foreground">
+                حالة النشر
+              </p>
+              <p className="text-xs text-muted-foreground">
+                المسودات لا تظهر في البحث العام. انشر عند الجاهزية.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
             <label className="group flex cursor-pointer items-center gap-2">
               <input
                 type="radio"
@@ -594,21 +630,22 @@ export function PropertyForm({
                 منشور
               </span>
             </label>
-          </div>
-        </CardContent>
-      </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </Section>
 
       {/* ============================================================ */}
       {/* Actions                                                       */}
       {/* ============================================================ */}
-      <div className="flex items-center justify-end gap-3">
+      <div className="sticky bottom-0 z-20 -mx-2 flex flex-col-reverse gap-2 border-t border-border bg-card/95 px-2 py-2 shadow-[0_-4px_16px_rgba(15,23,42,0.08)] backdrop-blur sm:-mx-1 sm:flex-row sm:items-center sm:justify-end sm:gap-3 sm:px-3 sm:py-2.5">
         <Link
           href="/dashboard/properties"
-          className={buttonVariants({ variant: "outline", size: "lg" })}
+          className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:w-auto")}
         >
           إلغاء
         </Link>
-        <Button type="submit" size="lg" disabled={pending}>
+        <Button type="submit" size="lg" disabled={pending} className="w-full shadow-sm sm:w-auto">
           {pending && <Loader2 className="animate-spin" />}
           <Send className="size-4" />
           {mode === "add" ? "حفظ العقار" : "حفظ التعديلات"}

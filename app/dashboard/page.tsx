@@ -60,7 +60,7 @@ export default async function DashboardHome() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-7xl space-y-6">
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -81,22 +81,22 @@ export default async function DashboardHome() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map(({ label, value, icon: Icon, trend }) => (
           <Card key={label}>
-            <CardContent className="p-5">
+            <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">{label}</p>
-                  <p className="text-3xl font-extrabold tabular-nums text-foreground">
+                  <p className="text-2xl font-extrabold tabular-nums text-foreground sm:text-3xl">
                     {new Intl.NumberFormat("ar-DZ").format(value)}
                   </p>
                 </div>
-                <span className="flex size-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-                  <Icon className="size-5" />
+                <span className="flex size-9 items-center justify-center rounded-md bg-accent/70 text-accent-foreground">
+                  <Icon className="size-4" />
                 </span>
               </div>
-              <p className="mt-3 flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <p className="mt-2 flex items-center gap-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
                 <ArrowUpRight className="size-3.5" />
                 {trend}
               </p>
@@ -105,7 +105,7 @@ export default async function DashboardHome() {
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {/* Recent properties */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between">
@@ -148,11 +148,14 @@ export default async function DashboardHome() {
                       {recentProperties.map((p) => {
                         const status = STATUS_LABELS[p.status];
                         return (
-                          <tr key={p.id}>
+                          <tr key={p.id} className="transition-colors hover:bg-secondary/40">
                             <td className="py-3">
-                              <p className="font-medium text-foreground">
+                              <Link
+                                href={`/dashboard/properties/${p.id}/edit`}
+                                className="font-medium text-foreground hover:text-primary hover:underline"
+                              >
                                 {p.title}
-                              </p>
+                              </Link>
                               <p className="text-xs text-muted-foreground">
                                 {TRANSACTION_LABELS[p.transaction]} · {p.rooms}{" "}
                                 غرف · {p.area} م² · {formatRelative(p.createdAt)}
@@ -183,12 +186,15 @@ export default async function DashboardHome() {
                     return (
                       <div
                         key={p.id}
-                        className="flex items-start justify-between gap-3 rounded-lg border border-border p-3"
+                        className="flex items-start justify-between gap-3 rounded-md border border-border/80 p-3 transition-colors hover:bg-secondary/40"
                       >
                         <div>
-                          <p className="font-medium text-foreground">
+                          <Link
+                            href={`/dashboard/properties/${p.id}/edit`}
+                            className="font-medium text-foreground hover:text-primary hover:underline"
+                          >
                             {p.title}
-                          </p>
+                          </Link>
                           <p className="text-xs text-muted-foreground">
                             {p.wilaya} · {TRANSACTION_LABELS[p.transaction]} ·{" "}
                             {p.area} م²

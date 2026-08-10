@@ -159,7 +159,7 @@ export function PropertyMarketingAssistant({
   }
 
   return (
-    <Card className="border-primary/30 bg-primary/5">
+    <Card className="border-border bg-card shadow-none">
       <CardHeader>
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
@@ -228,7 +228,7 @@ export function PropertyMarketingAssistant({
               const isSocialOrSeo = group === "social" || group === "seo";
 
               return (
-                <div key={field} className="space-y-2 rounded-lg border border-border bg-card p-3">
+                <div key={field} className="space-y-2 rounded-md border border-border/80 bg-secondary/20 p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <p className="text-sm font-semibold">{FIELD_LABELS[field]}</p>
                     <div className="flex flex-wrap gap-2">

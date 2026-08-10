@@ -47,9 +47,9 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
             href={href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+              "flex items-center gap-3 rounded-md border-r-2 border-transparent px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar",
               active
-                ? "bg-primary text-primary-foreground shadow-sm"
+                ? "border-primary bg-accent/60 text-foreground"
                 : "text-sidebar-foreground hover:bg-secondary",
             )}
           >
@@ -65,7 +65,7 @@ function NavList({ onNavigate }: { onNavigate?: () => void }) {
 function SidebarInner() {
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center border-b border-sidebar-border px-6">
+      <div className="flex h-16 items-center border-b border-sidebar-border px-5">
         <Brand />
       </div>
       <NavList />
@@ -95,7 +95,7 @@ export function DashboardShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="dashboard-shell min-h-screen bg-background text-foreground">
       {/* Desktop sidebar — fixed to the right edge (RTL) */}
       <aside className="fixed inset-y-0 right-0 z-30 hidden w-64 border-l border-sidebar-border bg-sidebar lg:block">
         <SidebarInner />
@@ -123,7 +123,7 @@ export function DashboardShell({
 
       {/* Main column */}
       <div className="lg:mr-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-card/80 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-card/90 px-3 backdrop-blur sm:px-5">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileOpen(true)}
@@ -137,9 +137,9 @@ export function DashboardShell({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <div className="text-left">
+          <div className="flex items-center gap-1.5">
+            <ThemeToggle className="size-8" />
+            <div className="border-r border-border pr-2.5 text-left">
               <p className="text-sm font-semibold leading-tight text-foreground">
                 {agencyName}
               </p>

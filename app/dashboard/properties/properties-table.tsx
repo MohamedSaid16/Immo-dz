@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useTransition } from "react";
 import {
   Archive,
+  Building2,
   Copy,
   Eye,
   Globe,
@@ -12,6 +14,7 @@ import {
   Loader2,
   Pencil,
   RotateCcw,
+  Search,
   Trash2,
 } from "lucide-react";
 
@@ -26,6 +29,7 @@ import {
 } from "./actions";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn, formatDZD } from "@/lib/utils";
 import {
   PROPERTY_TYPE_LABELS,
@@ -50,30 +54,52 @@ const FILTER_TABS: { key: FilterTab; label: string }[] = [
 function filterProperties(
   properties: Property[],
   tab: FilterTab,
+  query: string,
 ): Property[] {
+  const normalizedQuery = query.trim().toLocaleLowerCase();
   switch (tab) {
     case "published":
-      return properties.filter((p) => p.isPublished && !p.archivedAt);
+      properties = properties.filter((p) => p.isPublished && !p.archivedAt);
+      break;
     case "draft":
-      return properties.filter((p) => !p.isPublished && !p.archivedAt);
+      properties = properties.filter((p) => !p.isPublished && !p.archivedAt);
+      break;
     case "archived":
-      return properties.filter((p) => !!p.archivedAt);
-    default:
-      return properties;
+      properties = properties.filter((p) => !!p.archivedAt);
+      break;
   }
+
+  if (!normalizedQuery) return properties;
+  return properties.filter((property) =>
+    [property.title, property.wilaya, property.municipality, property.address]
+      .filter(Boolean)
+      .some((value) => value.toLocaleLowerCase().includes(normalizedQuery)),
+  );
 }
 
 /* ------------------------------------------------------------------ */
 /*  Sub-components                                                     */
 /* ------------------------------------------------------------------ */
 
-function PhotoPlaceholder({ count }: { count: number }) {
+function PhotoPlaceholder({ property }: { property: Property }) {
+  const cover = property.photos.find((photo) => photo.isCover) ?? property.photos[0];
+
   return (
-    <div className="relative flex size-12 shrink-0 items-center justify-center rounded-md bg-secondary text-muted-foreground">
-      <ImageIcon className="size-5" />
-      {count > 0 && (
+    <div className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-secondary text-muted-foreground">
+      {cover ? (
+        <Image
+          src={cover.thumbnailUrl ?? cover.url}
+          alt=""
+          fill
+          sizes="48px"
+          className="object-cover"
+        />
+      ) : (
+        <ImageIcon className="size-5" />
+      )}
+      {property.images > 0 && (
         <span className="absolute -bottom-1.5 -left-1.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
-          {count}
+          {property.images}
         </span>
       )}
     </div>
@@ -301,8 +327,9 @@ function DesktopActions({
 
 export function PropertiesTable({ properties }: { properties: Property[] }) {
   const [tab, setTab] = useState<FilterTab>("all");
+  const [query, setQuery] = useState("");
   const [actionError, setActionError] = useState<string>();
-  const filtered = filterProperties(properties, tab);
+  const filtered = filterProperties(properties, tab, query);
 
   const counts = {
     all: properties.length,
@@ -313,9 +340,15 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
 
   if (properties.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border p-12 text-center">
-        <p className="text-sm text-muted-foreground">
+      <div className="flex flex-col items-center gap-2 rounded-lg border border-border bg-card px-6 py-8 text-center">
+        <span className="flex size-10 items-center justify-center rounded-lg bg-accent text-accent-foreground">
+          <Building2 className="size-5" />
+        </span>
+        <p className="text-sm font-semibold text-foreground">
           لا توجد عقارات بعد. ابدأ بإضافة عقارك الأول.
+        </p>
+        <p className="max-w-sm text-xs text-muted-foreground">
+          أضف أول عقار لتبدأ إدارة البيانات والصور والنشر من لوحة واحدة.
         </p>
         <Link
           href="/dashboard/properties/add"
@@ -338,26 +371,37 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
         </p>
       )}
 
-      {/* Filter tabs */}
-      <div className="flex gap-1 rounded-lg border border-border bg-secondary/50 p-1">
-        {FILTER_TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setTab(key)}
-            className={cn(
-              "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
-              tab === key
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {label}
-            <span className="mr-1 text-[10px] text-muted-foreground">
-              ({counts[key]})
-            </span>
-          </button>
-        ))}
+      <div className="space-y-3">
+        <div className="relative">
+          <Search className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="ابحث بالعنوان أو الولاية أو البلدية"
+            aria-label="البحث في العقارات"
+            className="pr-9"
+          />
+        </div>
+        <div className="flex gap-1 overflow-x-auto rounded-lg border border-border bg-secondary/50 p-1">
+          {FILTER_TABS.map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTab(key)}
+              className={cn(
+                "min-w-max flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
+                tab === key
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {label}
+              <span className="mr-1 text-[10px] text-muted-foreground">
+                ({counts[key]})
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card">
@@ -388,7 +432,7 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
                       <tr key={p.id} className="hover:bg-secondary/40">
                         <td className="p-4">
                           <div className="flex items-center gap-3">
-                            <PhotoPlaceholder count={p.images} />
+                            <PhotoPlaceholder property={p} />
                             <div>
                               <div className="flex items-center gap-2">
                                 <p className="font-medium text-foreground">
@@ -440,7 +484,7 @@ export function PropertiesTable({ properties }: { properties: Property[] }) {
                 return (
                   <div key={p.id} className="space-y-3 p-4">
                     <div className="flex items-start gap-3">
-                      <PhotoPlaceholder count={p.images} />
+                      <PhotoPlaceholder property={p} />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2">
