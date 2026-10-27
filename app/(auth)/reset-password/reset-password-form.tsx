@@ -57,7 +57,7 @@ export function ResetPasswordForm() {
             minLength={6}
             maxLength={72}
             required
-            className="h-12 rounded-xl border-slate-200 px-4 transition-colors focus:border-[#C9A227] focus:ring-[#C9A227] dark:border-slate-700 dark:bg-slate-900"
+            className="h-12 rounded-xl border-slate-200 px-4 transition-colors focus:border-[#B5121B] focus:ring-[#B5121B] dark:border-slate-700 dark:bg-slate-900"
           />
         </div>
 
@@ -77,14 +77,14 @@ export function ResetPasswordForm() {
             minLength={6}
             maxLength={72}
             required
-            className="h-12 rounded-xl border-slate-200 px-4 transition-colors focus:border-[#C9A227] focus:ring-[#C9A227] dark:border-slate-700 dark:bg-slate-900"
+            className="h-12 rounded-xl border-slate-200 px-4 transition-colors focus:border-[#B5121B] focus:ring-[#B5121B] dark:border-slate-700 dark:bg-slate-900"
           />
         </div>
 
         <Button
           type="submit"
           size="lg"
-          className="h-12 w-full rounded-xl bg-[#0F172A] font-semibold text-white shadow-md transition-all hover:bg-[#0F172A]/90 dark:bg-[#C9A227] dark:text-[#0F172A] dark:hover:bg-[#C9A227]/90"
+          className="h-12 w-full rounded-xl bg-[#111111] font-semibold text-white shadow-md transition-all hover:bg-[#333333]"
           disabled={pending}
         >
           {pending && <Loader2 className="me-2 animate-spin" />}

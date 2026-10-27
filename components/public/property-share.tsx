@@ -167,7 +167,7 @@ export function PropertyShare({ propertyId, agencyId, propertyTitle, canonicalUr
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={onShareClick}
-        className="fixed bottom-6 left-6 z-50 flex size-14 items-center justify-center rounded-full bg-[#0F172A] text-white shadow-xl shadow-slate-900/20 ring-4 ring-white transition-all hover:bg-[#C9A227] dark:bg-[#C9A227] dark:text-[#0F172A] dark:ring-slate-900 lg:hidden"
+        className="fixed bottom-6 left-6 z-50 flex size-14 items-center justify-center rounded-full bg-[#111111] text-white shadow-xl shadow-black/15 ring-4 ring-white transition-all hover:bg-[#333333] lg:hidden"
         aria-label="مشاركة العقار"
       >
         <Share2 className="size-6" />

@@ -6,5 +6,5 @@ export default function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <div className="public-surface min-h-screen">{children}</div>;
 }

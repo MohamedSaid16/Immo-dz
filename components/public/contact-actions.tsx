@@ -55,7 +55,7 @@ export function ContactActions({
               onClick={handlePhoneClick}
               className={cn(
                 buttonVariants({ size: "lg" }),
-                "gap-2",
+                "gap-2 bg-[#111111] text-white hover:bg-[#333333]",
               )}
             >
               <Phone className="size-4" />

@@ -325,10 +325,15 @@ export async function searchProperties(
     .is("archived_at", null);
 
   if (filters.wilaya) query = query.eq("wilaya", filters.wilaya);
+  if (filters.municipality) {
+    query = query.ilike("municipality", `%${filters.municipality}%`);
+  }
   if (filters.type) query = query.eq("type", filters.type);
   if (filters.transaction) query = query.eq("transaction", filters.transaction);
   if (filters.minPrice != null) query = query.gte("price", filters.minPrice);
   if (filters.maxPrice != null) query = query.lte("price", filters.maxPrice);
+  if (filters.minArea != null) query = query.gte("area", filters.minArea);
+  if (filters.maxArea != null) query = query.lte("area", filters.maxArea);
   if (filters.rooms != null) query = query.gte("rooms", filters.rooms);
 
   const { data, error } = await query.order("created_at", { ascending: false });

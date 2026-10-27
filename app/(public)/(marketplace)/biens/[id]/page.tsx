@@ -208,7 +208,7 @@ export default async function PropertyDetailPage({
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6 lg:py-8">
+    <div className="mx-auto max-w-[1560px] space-y-8 px-4 py-8 sm:px-6 lg:py-12">
       <PropertyViewTracker propertyId={property.id} />
       <JsonLd schema={jsonLdSchema} />
       <Breadcrumbs items={breadcrumbs} />
@@ -220,11 +220,11 @@ export default async function PropertyDetailPage({
 
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-primary text-primary-foreground">
+              <Badge className="rounded-none bg-[#111111] text-white">
                 {TRANSACTION_LABELS[property.transaction]}
               </Badge>
-              <Badge variant={status.variant}>{status.label}</Badge>
-              <Badge variant="outline">
+              <Badge variant={status.variant} className="rounded-none">{status.label}</Badge>
+              <Badge variant="outline" className="rounded-none">
                 {PROPERTY_TYPE_LABELS[property.type]}
               </Badge>
             </div>
@@ -244,7 +244,7 @@ export default async function PropertyDetailPage({
               </p>
             </div>
 
-            <p className="text-3xl font-extrabold tabular-nums text-primary">
+            <p className="text-3xl font-semibold tabular-nums text-[#111111]">
               {formatDZD(property.price)}
               <span className="text-base font-medium text-muted-foreground">
                 {priceSuffix}
@@ -257,9 +257,9 @@ export default async function PropertyDetailPage({
             {specs.map((spec) => (
               <div
                 key={spec.label}
-                className="flex flex-col items-center gap-1 rounded-lg border border-border bg-card p-3 text-center"
+                className="flex flex-col items-center gap-1 border border-border bg-white p-3 text-center"
               >
-                <spec.icon className="size-5 text-primary" />
+                <spec.icon className="size-5 text-[#111111]" />
                 <span className="text-sm font-semibold text-foreground">
                   {spec.value}
                 </span>
@@ -272,8 +272,8 @@ export default async function PropertyDetailPage({
 
           {/* Energy class */}
           {energyInfo && (
-            <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-4">
-              <Zap className="size-5 text-primary" />
+            <div className="flex items-center gap-3 border border-border bg-[#f4f4f4] p-4">
+              <Zap className="size-5 text-[#111111]" />
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-foreground">
                   التصنيف الطاقوي:
@@ -305,7 +305,7 @@ export default async function PropertyDetailPage({
                     {property.amenities.map((a) => (
                       <span
                         key={a}
-                        className="rounded-full border border-border bg-secondary/50 px-2.5 py-1 text-xs text-foreground"
+                        className="border border-border bg-white px-2.5 py-1 text-xs text-foreground"
                       >
                         {a}
                       </span>
@@ -323,7 +323,7 @@ export default async function PropertyDetailPage({
                     {property.features.map((f) => (
                       <span
                         key={f}
-                        className="rounded-full border border-border bg-secondary/50 px-2.5 py-1 text-xs text-foreground"
+                        className="border border-border bg-white px-2.5 py-1 text-xs text-foreground"
                       >
                         {f}
                       </span>
@@ -341,7 +341,7 @@ export default async function PropertyDetailPage({
                     {property.nearbyPlaces.map((n) => (
                       <span
                         key={n}
-                        className="rounded-full border border-border bg-secondary/50 px-2.5 py-1 text-xs text-foreground"
+                        className="border border-border bg-white px-2.5 py-1 text-xs text-foreground"
                       >
                         {n}
                       </span>
@@ -416,8 +416,8 @@ export default async function PropertyDetailPage({
           {/* Location */}
           <div className="space-y-2">
             <h2 className="text-lg font-bold">الموقع · Localisation</h2>
-            <div className="flex items-start gap-2 rounded-lg border border-border bg-card p-4 text-sm">
-              <MapPin className="mt-0.5 size-5 shrink-0 text-primary" />
+            <div className="flex items-start gap-2 border border-border bg-[#f4f4f4] p-4 text-sm">
+              <MapPin className="mt-0.5 size-5 shrink-0 text-[#111111]" />
               <div>
                 <p className="font-medium text-foreground">{property.address}</p>
                 <p className="text-muted-foreground">
@@ -451,7 +451,7 @@ export default async function PropertyDetailPage({
                   الوكالة
                 </p>
                 <div className="flex items-center gap-3">
-                  <span className="flex size-12 items-center justify-center rounded-lg bg-primary text-lg font-bold text-primary-foreground">
+                  <span className="flex size-12 items-center justify-center rounded-sm bg-[#111111] text-lg font-bold text-white">
                     {agency.name.charAt(0)}
                   </span>
                   <div>

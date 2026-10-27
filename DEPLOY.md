@@ -31,8 +31,11 @@ this exact order:
 6. `supabase/006_rls_and_privileges_hardening.sql`
 7. `supabase/007_storage_write_hardening.sql`
 
-Do not reapply or edit these migrations for a Vercel deployment. No additional
-database migration is required.
+The P1/P2 migrations `008_ai_usage.sql` and `009_social_publishing.sql` must
+also be applied manually before enabling their related features. P3 adds
+`010_social_publishing_pipeline.sql`; review and apply it manually before
+using the Publish action. The application never applies migrations
+automatically.
 
 ## 3. Required environment variables
 
@@ -55,6 +58,25 @@ Do not configure `SUPABASE_SERVICE_ROLE_KEY`, a database password, a JWT secret,
 or any private key. The application uses the public Supabase key together with
 the authenticated session, server-side ownership checks, RLS and Storage
 policies.
+
+### P3 social publishing (disabled by default)
+
+These variables are server-only and must remain disabled until a trusted n8n
+endpoint is reviewed and configured:
+
+```text
+SOCIAL_PUBLISHING_ENABLED=false
+N8N_PUBLISH_WEBHOOK_URL=
+N8N_PUBLISH_WEBHOOK_SECRET=
+SOCIAL_PUBLISHING_TIMEOUT_MS=5000
+```
+
+The app-side P3 trusted transitions require `SUPABASE_SERVICE_ROLE_KEY` on the
+server only. It must never use the `NEXT_PUBLIC_` prefix, enter Client
+Components, or be logged. Normal agency CRUD continues to use the authenticated
+SSR client and RLS. No Meta credentials or n8n workflow is configured here.
+The result callback is HMAC-protected; its runtime callback origin is separate
+from the canonical public property origin.
 
 ## 4. GitHub preparation
 

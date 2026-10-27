@@ -3,11 +3,23 @@
 import { revalidatePath } from "next/cache";
 
 import { isUuid } from "@/lib/lead-validation";
-import type { SocialActionResult } from "@/lib/social-publishing/contracts";
+import type {
+  SocialActionResult,
+  SocialPipelineActionResult,
+} from "@/lib/social-publishing/contracts";
 import {
+  getSocialPublishContext,
+  queueSocialPublicationRpc,
+  recordSocialPublicationDeliveryRpc,
+  markSocialPublicationPublishingRpc,
   prepareSocialPublicationRpc,
   updateSocialPublicationContentRpc,
 } from "@/lib/social-publishing/repository";
+import { buildSocialPublishRequestedEvent } from "@/lib/social-publishing/events";
+import {
+  deliverSocialPublishEvent,
+  isSocialPublishingConfigured,
+} from "@/lib/social-publishing/webhook";
 import {
   isSocialChannel,
   validateSocialContent,
@@ -45,6 +57,56 @@ function databaseErrorMessage(error: unknown): string {
 function revalidateSocial(propertyId: string): void {
   revalidatePath(`/dashboard/properties/${propertyId}/edit`);
   revalidatePath("/dashboard/properties");
+}
+
+async function queueAndDeliverSocialPublication(
+  publicationId: string,
+): Promise<SocialPipelineActionResult> {
+  try {
+    const queued = await queueSocialPublicationRpc(publicationId);
+    if (!queued) {
+      return { ok: false, error: "تعذّر إنشاء طلب النشر." };
+    }
+
+    revalidateSocial(queued.publication.propertyId);
+    const context = await getSocialPublishContext(publicationId, queued.attempt);
+    if (!context) {
+      console.error("[social-action:publish-context]", { publicationId });
+      return { ok: true, result: queued, delivery: "failed" };
+    }
+
+    const event = buildSocialPublishRequestedEvent(context);
+    if (!isSocialPublishingConfigured()) {
+      return { ok: true, result: queued, delivery: "disabled" };
+    }
+
+    await recordSocialPublicationDeliveryRpc(
+      queued.publication.id,
+      queued.attempt.eventId,
+    );
+    const delivery = await deliverSocialPublishEvent(event);
+    if (delivery.status === "sent") {
+      try {
+        await markSocialPublicationPublishingRpc(
+          queued.publication.id,
+          queued.attempt.eventId,
+        );
+      } catch (error) {
+        logSocialActionError("mark-publishing", error);
+      }
+      revalidateSocial(queued.publication.propertyId);
+      return { ok: true, result: queued, delivery: "sent" };
+    }
+
+    return {
+      ok: true,
+      result: queued,
+      delivery: "failed",
+    };
+  } catch (error) {
+    logSocialActionError("queue", error);
+    return { ok: false, error: databaseErrorMessage(error) };
+  }
 }
 
 export async function prepareSocialPublication(
@@ -107,4 +169,22 @@ export async function updateSocialPublicationContent(
     logSocialActionError("update", error);
     return { ok: false, error: databaseErrorMessage(error) };
   }
+}
+
+export async function requestSocialPublication(
+  publicationId: string,
+): Promise<SocialPipelineActionResult> {
+  if (!isUuid(publicationId)) {
+    return { ok: false, error: "معرّف المسودة غير صالح." };
+  }
+  return queueAndDeliverSocialPublication(publicationId);
+}
+
+export async function retrySocialPublication(
+  publicationId: string,
+): Promise<SocialPipelineActionResult> {
+  if (!isUuid(publicationId)) {
+    return { ok: false, error: "معرّف المنشور غير صالح." };
+  }
+  return queueAndDeliverSocialPublication(publicationId);
 }

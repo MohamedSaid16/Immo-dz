@@ -107,7 +107,7 @@ export default function PropertyMap({
                 <p className="text-sm font-bold text-foreground">
                   {property.title}
                 </p>
-                <p className="text-base font-extrabold text-primary">
+                <p className="text-base font-semibold text-[#111111]">
                   {formatDZD(property.price)}
                   <span className="text-xs font-medium text-muted-foreground">
                     {property.transaction === "rent" ? " دج/شهر" : " دج"}
@@ -123,7 +123,7 @@ export default function PropertyMap({
                 </div>
                 <Link
                   href={`/biens/${property.id}`}
-                  className="mt-1 block rounded-md bg-primary px-3 py-1.5 text-center text-xs font-semibold text-primary-foreground hover:bg-primary/90"
+                  className="mt-1 block rounded-md bg-[#111111] px-3 py-1.5 text-center text-xs font-semibold text-white hover:bg-[#333333]"
                 >
                   Voir le bien · عرض العقار
                 </Link>

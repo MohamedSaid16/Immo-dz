@@ -179,10 +179,13 @@ export type Property = {
 
 export type PropertyFilters = {
   wilaya?: string;
+  municipality?: string;
   type?: PropertyType;
   transaction?: TransactionType;
   minPrice?: number;
   maxPrice?: number;
+  minArea?: number;
+  maxArea?: number;
   /** Minimum number of rooms. */
   rooms?: number;
 };

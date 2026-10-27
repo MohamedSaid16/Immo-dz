@@ -119,6 +119,48 @@
   --sidebar-border: #2b3647;
 }
 
+/* Public catalogue palette: editorial black, white, light gray, and a
+   restrained dark-red accent. Scoped so dashboard tokens remain unchanged. */
+.public-surface,
+.auth-surface {
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --primary: #b5121b;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f4;
+  --secondary-foreground: #111111;
+  --muted: #f4f4f4;
+  --muted-foreground: #777777;
+  --accent: #f4f4f4;
+  --accent-foreground: #111111;
+  --border: #e5e5e5;
+  --input: #dadada;
+  --ring: #b5121b;
+  --radius: 0.25rem;
+}
+
+.public-surface.dark,
+.dark .public-surface,
+.dark .auth-surface {
+  --background: #ffffff;
+  --foreground: #111111;
+  --card: #ffffff;
+  --card-foreground: #111111;
+  --primary: #b5121b;
+  --primary-foreground: #ffffff;
+  --secondary: #f4f4f4;
+  --secondary-foreground: #111111;
+  --muted: #f4f4f4;
+  --muted-foreground: #777777;
+  --accent: #f4f4f4;
+  --accent-foreground: #111111;
+  --border: #e5e5e5;
+  --input: #dadada;
+  --ring: #b5121b;
+}
+
 .dashboard-shell input:not([type="radio"]):not([type="checkbox"]),
 .dashboard-shell select,
 .dashboard-shell textarea {

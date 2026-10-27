@@ -27,14 +27,14 @@ export function PropertyPlaceholder({
   return (
     <div
       className={cn(
-        "flex items-center justify-center bg-gradient-to-br from-primary/10 via-secondary to-accent text-primary/50",
+        "flex items-center justify-center bg-[#f4f4f4] text-[#777777]",
         className,
       )}
     >
       <div className="flex flex-col items-center gap-1">
         <Icon className="size-10" />
         {label && (
-          <span className="text-xs font-medium text-primary/60">{label}</span>
+          <span className="text-xs font-medium text-[#777777]">{label}</span>
         )}
       </div>
     </div>

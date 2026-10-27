@@ -71,20 +71,20 @@ export default async function AgencyProfilePage({
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-4 py-6 sm:px-6 lg:py-8">
+    <div className="mx-auto max-w-[1560px] space-y-8 px-4 py-8 sm:px-6 lg:py-12">
       <JsonLd schema={jsonLdSchema} />
       <Breadcrumbs items={breadcrumbs} />
 
       {/* Agency header */}
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
+      <div className="overflow-hidden border border-border bg-white">
         {/* Cover banner over a gradient fallback (gradient shows if image missing). */}
         <div
-          className="h-32 bg-gradient-to-l from-primary/20 via-accent to-secondary bg-cover bg-center sm:h-40"
+          className="h-32 bg-[#f4f4f4] bg-cover bg-center sm:h-40"
           style={{ backgroundImage: "url(/images/banner-2.jpg)" }}
         />
         <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-end gap-4">
-            <span className="-mt-14 flex size-24 shrink-0 items-center justify-center rounded-2xl border-4 border-card bg-primary text-3xl font-extrabold text-primary-foreground shadow-sm">
+            <span className="-mt-14 flex size-24 shrink-0 items-center justify-center rounded-sm border-4 border-white bg-[#111111] text-3xl font-extrabold text-white">
               {agency.name.charAt(0)}
             </span>
             <div className="space-y-1">
@@ -125,15 +125,15 @@ export default async function AgencyProfilePage({
 
         <div className="grid gap-3 border-t border-border px-6 py-4 text-sm sm:grid-cols-3">
           <p className="flex items-center gap-2 text-muted-foreground">
-            <MapPin className="size-4 text-primary" />
+            <MapPin className="size-4 text-[#111111]" />
             {agency.wilaya}
           </p>
           <p dir="ltr" className="flex items-center gap-2 text-muted-foreground sm:justify-center">
-            <Phone className="size-4 text-primary" />
+            <Phone className="size-4 text-[#111111]" />
             {agency.phone}
           </p>
           <p className="flex items-center gap-2 text-muted-foreground sm:justify-end">
-            <Building2 className="size-4 text-primary" />
+            <Building2 className="size-4 text-[#111111]" />
             {properties.length} عقار
           </p>
         </div>
@@ -155,7 +155,7 @@ export default async function AgencyProfilePage({
             ))}
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
+            <div className="border-y border-border py-12 text-center text-sm text-muted-foreground">
             لا توجد عقارات منشورة حاليًا.
           </div>
         )}
